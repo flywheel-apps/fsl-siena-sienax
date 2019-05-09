@@ -1,0 +1,165 @@
+#! /bin/bash
+#
+#
+
+CONTAINER="[flywheel/fsl-siena]"
+echo -e "$CONTAINER  Initiated"
+
+
+###############################################################################
+# Built to flywheel-v0 spec.
+
+FLYWHEEL_BASE=/flywheel/v0
+OUTPUT_DIR=$FLYWHEEL_BASE/output
+INPUT_DIR=$FLYWHEEL_BASE/input
+MANIFEST=$FLYWHEEL_BASE/manifest.json
+CONFIG_FILE=$FLYWHEEL_BASE/config.json
+
+###############################################################################
+# Configure the ENV
+
+chmod +x /etc/fsl/5.0/fsl.sh
+source /etc/fsl/5.0/fsl.sh
+export USER=Flywheel
+
+
+###############################################################################
+# Initialize config parameters
+DEBUG=''
+BET=''
+SEG=''
+T2=''
+SS_BET=''
+TOP=''
+BOTTOM=''
+S_DIFF=''
+VENT=''
+MASK=''
+
+
+###############################################################################
+# Generate flags from the manifest
+
+DEBUG_flag=$(jq -r <$MANIFEST '''.config.DEBUG.id')
+BET_flag=$(jq -r <$MANIFEST '''.config.BET.id')
+SEG_flag=$(jq -r <$MANIFEST '''.config.SEG.id')
+T2_flag=$(jq -r <$MANIFEST '''.config.T2.id')
+SS_BET_flag=$(jq -r <$MANIFEST '''.config.SS_BET.id')
+TOP_flag=$(jq -r <$MANIFEST '''.config.TOP.id')
+BOTTOM_flag=$(jq -r <$MANIFEST '''.config.BOTTOM.id')
+S_DIFF_flag=$(jq -r <$MANIFEST '''.config.S_DIFF.id')
+VENT_flag=$(jq -r <$MANIFEST '''.config.VENT.id')
+MASK_flag="-v"
+
+
+##############################################################################
+# Parse configuration options from CONFIG file and MANIFEST
+
+function parse_config {
+
+  CONFIG_FILE=$FLYWHEEL_BASE/config.json
+  MANIFEST_FILE=$FLYWHEEL_BASE/manifest.json
+
+  if [[ -f $CONFIG_FILE ]]; then
+    echo "$(cat $CONFIG_FILE | jq -r '.config.'$1)"
+  else
+    CONFIG_FILE=$MANIFEST_FILE
+    echo "$(cat $MANIFEST_FILE | jq -r '.config.'$1'.default')"
+  fi
+}
+
+# String parsing
+config_DEBUG="$(parse_config 'DEBUG')"
+config_BET="$(parse_config 'BET')"
+config_SEG="$(parse_config 'SEG')"
+config_T2="$(parse_config 'T2')"
+config_SS_BET="$(parse_config 'SS_BET')"
+config_TOP="$(parse_config 'TOP')"
+config_BOTTOM="$(parse_config 'BOTTOM')"
+config_S_DIFF="$(parse_config 'S_DIFF')"
+config_VENT="$(parse_config 'VENT')"
+config_MASK=$(jq -r <$CONFIG_FILE '''.inputs.ventricle_mask.location.path')
+
+echo "DEBUG Config: $config_DEBUG"
+
+# Boolean parsing
+OPTIONS=""
+
+if [[ $config_DEBUG == 'true' ]]; then
+  OPTIONS="$OPTIONS $DEBUG_flag"
+fi
+if [[ $config_BET != "" ]]; then
+  OPTIONS="$OPTIONS $BET_flag $config_BET"
+fi
+if [[ $config_SEG == 'true' ]]; then
+  OPTIONS="$OPTIONS $SEG_flag"
+fi
+if [[ $config_T2 == 'true' ]]; then
+  OPTIONS="$OPTIONS $T2_flag"
+fi
+if [[ $config_SS_BET == 'true' ]]; then
+  OPTIONS="$OPTIONS $SS_BET_flag"
+fi
+if [[ $config_TOP != "" ]]; then
+  OPTIONS="$OPTIONS $TOP_flag $config_TOP"
+fi
+if [[ $config_BOTTOM != "" ]]; then
+  OPTIONS="$OPTIONS $BOTTOM_flag $config_BOTTOM"
+fi
+if [[ $config_S_DIFF != "" ]]; then
+  OPTIONS="$OPTIONS $S_DIFF_flag $config_S_DIFF"
+fi
+if [[ $config_VENT == 'true' ]]; then
+  OPTIONS="$OPTIONS $VENT_flag"
+fi
+if [[ $config_MASK != null ]]; then
+  OPTIONS="$OPTIONS $MASK_flag $config_MASK"
+fi
+
+echo $OPTIONS
+
+###############################################################################
+
+#chmod -R 755 ${OUTPUT_DIR}
+
+# CREATE SUBCORTICAL MASKS USING FSL'S SIENA
+echo -e "${CONTAINER}  Running FSL's SIENA..."
+
+
+####################################################################
+# RUN THE FSL SIENA Algorithm
+####################################################################
+
+cd ${OUTPUT_DIR}
+echo ${OUTPUT_DIR}
+
+# Parse input filepaths from config
+NIFTI_1=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI_1.location.path')
+NIFTI_2=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI_2.location.path')
+
+echo ${NIFTI_1}
+echo ${NIFTI_2}
+
+echo -e "${CONTAINER}  Running SIENA ..."
+
+echo -e "siena ${NIFTI_1} ${NIFTI_2} ${OPTIONS} -o $OUTPUT_DIR"
+
+time siena ${NIFTI_1} ${NIFTI_2} ${OPTIONS} -o $OUTPUT_DIR
+
+SIENA_EXIT_STATUS=$?
+
+if [[ $SIENA_EXIT_STATUS == 0 ]]; then
+  echo -e "${CONTAINER}  FSL's SIENA completed successfully!"
+fi
+
+###############################################################################
+# EXIT
+###############################################################################
+
+if [[ $SIENA_EXIT_STATUS == 0 ]]; then
+  echo -e "$CONTAINER  Done!"
+  exit 0
+else
+  echo "$CONTAINER  Error while running SIENA... Exiting($SIENA_EXIT_STATUS)"
+  exit $SIENA_EXIT_STATUS
+fi

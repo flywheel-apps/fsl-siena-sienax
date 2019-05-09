@@ -1,0 +1,91 @@
+{
+	"name": "fsl-sienax",
+	"label": "FSL: SIENAX - subcotical volume estimation (Single Time Point - v5.0)",
+	"description": "FSL's SIENAX.",
+	"version": "0.1.1",
+	"inputs": {
+		"NIFTI": {
+			"base": "file",
+			"optional": false,
+			"description": "Structural T1 NIfTI file to be processed.",
+			"type": {
+				"enum": [
+					"nifti"
+				]
+			}
+		},
+		"lesion_mask": {
+			"base": "file",
+			"optional": true,
+			"description": "an optional lesion (or lesion+CSF) mask to remove incorrectly labelled \"grey matter\" voxels",
+			"type": {
+				"enum": [
+					"nifti"
+				]
+			}
+		}
+	},
+	"config": {
+		"BET": {
+			"default": "",
+			"description": "bet options",
+			"id": "-B",
+			"type": "string"
+		},
+		"BOTTOM": {
+			"default": "",
+			"description": "ignore from b (mm) upwards in MNI152/Talairach space [default=false]",
+			"id": "-b",
+			"type": "string"
+		},
+		"DEBUG": {
+			"default": false,
+			"description": "debug (don't delete intermediate files) [default=false]",
+			"id": "-d",
+			"type": "boolean"
+		},
+		"SEG": {
+			"default": false,
+			"description": "two-class segmentation (don't segment grey and white matter separately) - use this if there is poor grey/white contrast [default=false]",
+			"id": "-2",
+			"type": "boolean"
+		},
+		"S_FAST": {
+			"default": "",
+			"description": "if you want to change the segmentation defaults, put FAST options inside double-quotes after using the -S flag. For example, to increase the number of segmentation iterations use: -S \"-i 20\"",
+			"id": "-S",
+			"type": "string"
+		},
+		"T2": {
+			"default": false,
+			"description": "tell FAST that the input images are T2-weighted and not T1 [default=false]",
+			"id": "-t2",
+			"type": "boolean"
+		},
+		"TOP": {
+			"default": "",
+			"description": "ignore from t (mm) upwards in MNI152/Talairach space [default=false]",
+			"id": "-t",
+			"type": "string"
+		},
+		"REGIONAL": {
+			"default": false,
+			"description": "tell SIENAX to estimate \"regional\" volumes as well as global; this produces peripheral cortex GM volume (3-class segmentation only) and ventricular CSF volume [default=false]",
+			"id": "-r",
+			"type": "boolean"
+		}
+	},
+	"author": "Analysis Group, FMRIB, Oxford, UK.",
+	"maintainer": "Kaleb Fischer \u003ckalebfischer@flywheel.io\u003e",
+	"license": "Apache-2.0",
+	"custom": {
+		"flywheel": {
+			"suite": "FSL"
+		},
+		"gear-builder": {
+			"category": "analysis",
+			"container": "a9d25a06e106f6db724162c04550f272819c6a80cd596515d54507f8ee820bdc",
+			"image": "gear-builder-tsyzoodtos-20190501115233"
+		}
+	}
+}

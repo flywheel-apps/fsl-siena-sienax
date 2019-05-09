@@ -1,0 +1,163 @@
+#! /bin/bash
+#
+#
+
+CONTAINER="[flywheel/fsl-siena]"
+echo -e "$CONTAINER  Initiated"
+
+
+###############################################################################
+# Built to flywheel-v0 spec.
+
+FLYWHEEL_BASE=/flywheel/v0
+OUTPUT_DIR=$FLYWHEEL_BASE/output
+INPUT_DIR=$FLYWHEEL_BASE/input
+MANIFEST=$FLYWHEEL_BASE/manifest.json
+CONFIG_FILE=$FLYWHEEL_BASE/config.json
+
+###############################################################################
+# Configure the ENV
+
+chmod +x /etc/fsl/5.0/fsl.sh
+source /etc/fsl/5.0/fsl.sh
+export USER=Flywheel
+
+
+###############################################################################
+# Initialize config parameters
+DEBUG=''
+BET=''
+SEG=''
+T2=''
+SS_BET=''
+TOP=''
+BOTTOM=''
+S_DIFF=''
+REGIONAL=''
+
+
+
+###############################################################################
+# Generate flags from the manifest
+
+DEBUG_flag=$(jq -r <$MANIFEST '''.config.DEBUG.id')
+BET_flag=$(jq -r <$MANIFEST '''.config.BET.id')
+SEG_flag=$(jq -r <$MANIFEST '''.config.SEG.id')
+T2_flag=$(jq -r <$MANIFEST '''.config.T2.id')
+SS_BET_flag=$(jq -r <$MANIFEST '''.config.SS_BET.id')
+TOP_flag=$(jq -r <$MANIFEST '''.config.TOP.id')
+BOTTOM_flag=$(jq -r <$MANIFEST '''.config.BOTTOM.id')
+S_FAST_flag=$(jq -r <$MANIFEST '''.config.S_DIFF.id')
+REGIONAL_flag=$(jq -r <$MANIFEST '''.config.REGIONAL.id')
+LESION_MASK_flag="-lm"
+
+
+##############################################################################
+# Parse configuration options from CONFIG file and MANIFEST
+
+function parse_config {
+
+  CONFIG_FILE=$FLYWHEEL_BASE/config.json
+  MANIFEST_FILE=$FLYWHEEL_BASE/manifest.json
+
+  if [[ -f $CONFIG_FILE ]]; then
+    echo "$(cat $CONFIG_FILE | jq -r '.config.'$1)"
+  else
+    CONFIG_FILE=$MANIFEST_FILE
+    echo "$(cat $MANIFEST_FILE | jq -r '.config.'$1'.default')"
+  fi
+}
+
+# String parsing
+config_DEBUG="$(parse_config 'DEBUG')"
+config_BET="$(parse_config 'BET')"
+config_SEG="$(parse_config 'SEG')"
+config_T2="$(parse_config 'T2')"
+config_SS_BET="$(parse_config 'SS_BET')"
+config_TOP="$(parse_config 'TOP')"
+config_BOTTOM="$(parse_config 'BOTTOM')"
+config_S_FAST="$(parse_config 'S_FAST')"
+config_REGIONAL="$(parse_config 'REGIONAL')"
+config_LESION_MASK=$(jq -r <$CONFIG_FILE '''.inputs.lesion_mask.location.path')
+
+echo "DEBUG Config: $config_DEBUG"
+
+# Boolean parsing
+OPTIONS=""
+
+if [[ $config_DEBUG == 'true' ]]; then
+  OPTIONS="$OPTIONS $DEBUG_flag"
+fi
+if [[ $config_BET != "" ]]; then
+  OPTIONS="$OPTIONS $BET_flag $config_BET"
+fi
+if [[ $config_SEG == 'true' ]]; then
+  OPTIONS="$OPTIONS $SEG_flag"
+fi
+if [[ $config_T2 == 'true' ]]; then
+  OPTIONS="$OPTIONS $T2_flag"
+fi
+if [[ $config_SS_BET == 'true' ]]; then
+  OPTIONS="$OPTIONS $SS_BET_flag"
+fi
+if [[ $config_TOP != "" ]]; then
+  OPTIONS="$OPTIONS $TOP_flag $config_TOP"
+fi
+if [[ $config_BOTTOM != "" ]]; then
+  OPTIONS="$OPTIONS $BOTTOM_flag $config_BOTTOM"
+fi
+if [[ $config_S_FAST != "" ]]; then
+  OPTIONS="$OPTIONS $S_FAST_flag $config_S_FAST"
+fi
+if [[ $config_REGIONAL == 'true' ]]; then
+  OPTIONS="$OPTIONS $REGIONAL_flag"
+fi
+if [[ $config_LESION_MASK != null ]]; then
+  OPTIONS="$OPTIONS $LESION_MASK_flag $config_LESION_MASK"
+fi
+
+echo $OPTIONS
+
+###############################################################################
+
+#chmod -R 755 ${OUTPUT_DIR}
+
+
+echo -e "${CONTAINER}  Running FSL's SIENAX..."
+SIENA=$FW_CONFIG_SIENA
+
+####################################################################
+# RUN THE FSL SIENAX Algorithm
+####################################################################
+
+cd ${OUTPUT_DIR}
+echo ${OUTPUT_DIR}
+
+# Parse input filepath from config
+NIFTI=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI.location.path')
+
+echo ${NIFTI}
+
+echo -e "${CONTAINER}  Running SIENAX ..."
+
+echo -e "sienax ${NIFTI} ${OPTIONS} -o $OUTPUT_DIR"
+
+time sienax ${NIFTI} ${OPTIONS} -o $OUTPUT_DIR
+
+SIENA_EXIT_STATUS=$?
+
+if [[ $SIENA_EXIT_STATUS == 0 ]]; then
+  echo -e "${CONTAINER}  FSL's SIENAX completed successfully!"
+fi
+
+###############################################################################
+# EXIT
+###############################################################################
+
+if [[ $SIENA_EXIT_STATUS == 0 ]]; then
+  echo -e "$CONTAINER  Done!"
+  exit 0
+else
+  echo "$CONTAINER  Error while running SIENA... Exiting($SIENA_EXIT_STATUS)"
+  exit $SIENA_EXIT_STATUS
+fi
