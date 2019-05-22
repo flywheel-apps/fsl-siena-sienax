@@ -84,8 +84,7 @@
 		},
 		"gear-builder": {
 			"category": "analysis",
-			"container": "a9d25a06e106f6db724162c04550f272819c6a80cd596515d54507f8ee820bdc",
-			"image": "gear-builder-tsyzoodtos-20190501115233"
+			"image": "fsl-siena:1.0.2"
 		}
 	}
 }

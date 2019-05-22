@@ -130,11 +130,25 @@ SIENA=$FW_CONFIG_SIENA
 # RUN THE FSL SIENAX Algorithm
 ####################################################################
 
+function fix_whitespace {
+
+  pattern=" |'"
+
+  if [[ $1 =~ $pattern ]]; then
+    cp "${1}" "${1// /_}"
+    echo "${1// /_}"
+  else
+    echo ${1}
+  fi
+}
+
 cd ${OUTPUT_DIR}
 echo ${OUTPUT_DIR}
 
 # Parse input filepath from config
 NIFTI=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI.location.path')
+
+NIFTI=$(fix_whitespace "$NIFTI")
 
 echo ${NIFTI}
 

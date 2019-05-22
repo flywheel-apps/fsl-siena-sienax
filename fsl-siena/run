@@ -130,6 +130,18 @@ echo -e "${CONTAINER}  Running FSL's SIENA..."
 # RUN THE FSL SIENA Algorithm
 ####################################################################
 
+function fix_whitespace {
+
+  pattern=" |'"
+
+  if [[ $1 =~ $pattern ]]; then
+    cp "${1}" "${1// /_}"
+    echo "${1// /_}"
+  else
+    echo ${1}
+  fi
+}
+
 cd ${OUTPUT_DIR}
 echo ${OUTPUT_DIR}
 
@@ -137,6 +149,9 @@ echo ${OUTPUT_DIR}
 NIFTI_1=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI_1.location.path')
 NIFTI_2=$(jq -r <$CONFIG_FILE '''.inputs.NIFTI_2.location.path')
 
+# We have to copy the file rather than rename because it is mounted and we can't unmount
+NIFTI_1=$(fix_whitespace "$NIFTI_1")
+NIFTI_2=$(fix_whitespace "$NIFTI_2")
 echo ${NIFTI_1}
 echo ${NIFTI_2}
 

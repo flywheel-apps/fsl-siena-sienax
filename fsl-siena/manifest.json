@@ -2,7 +2,7 @@
 	"name": "fsl-siena",
 	"label": "FSL: SIENA - subcotical volume estimation (v5.0)",
 	"description": "FSL's SIENA. As implemented in this Gear SIENA allows for basic extraction of 14 subcortical regions and Brain-Stem/4th Ventricle. This gear either takes in a deskulled high resolution T1 image or a T1 image with a skull where the user has to specify the T1 to be deskulled. In the latter option, brain extraction BET2 will be used.",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"inputs": {
 		"NIFTI_1": {
 			"base": "file",
@@ -101,8 +101,7 @@
 		},
 		"gear-builder": {
 			"category": "analysis",
-			"container": "a9d25a06e106f6db724162c04550f272819c6a80cd596515d54507f8ee820bdc",
-			"image": "gear-builder-tsyzoodtos-20190501115233"
+			"image": "fsl-siena:1.0.2"
 		}
 	}
 }
