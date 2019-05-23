@@ -78,6 +78,7 @@
 	"author": "Analysis Group, FMRIB, Oxford, UK.",
 	"maintainer": "Kaleb Fischer \u003ckalebfischer@flywheel.io\u003e",
 	"license": "Apache-2.0",
+	"source": "https://github.com/flywheel-apps/fsl-siena-sienax/tree/master/fsl-sienax",
 	"custom": {
 		"flywheel": {
 			"suite": "FSL"
