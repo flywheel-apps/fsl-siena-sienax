@@ -1,0 +1,137 @@
+{
+	"name": "fsl-siena-sienax",
+	"label": "fsl-siena-sienax",
+	"description": "FSL's SIENA. As implemented in this Gear SIENA allows for basic extraction of 14 subcortical regions and Brain-Stem/4th Ventricle. This gear either takes in a deskulled high resolution T1 image or a T1 image with a skull where the user has to specify the T1 to be deskulled. In the latter option, brain extraction BET2 will be used.",
+	"version": "1.1.0",
+	"inputs": {
+		"nifti_1": {
+			"base": "file",
+			"description": "Structural T1 NIfTI file to be processed.",
+			"optional": false,
+			"type": {
+				"enum": [
+					"nifti"
+				]
+			}
+		},
+		"nifti_2": {
+			"base": "file",
+			"description": "Structural T1 NIfTI file to be processed.",
+			"optional": true,
+			"type": {
+				"enum": [
+					"nifti"
+				]
+			}
+		},
+		"ventricle_mask": {
+			"base": "file",
+			"description": "optional user-supplied ventricle mask (default is $FSLDIR/bin/MNI152_T1_2mm_VentricleMask)",
+			"optional": true,
+			"type": {
+				"enum": [
+					"nifti"
+				]
+			}
+		}
+	},
+	"config": {
+		"BET": {
+			"default": "",
+			"description": "bet options",
+			"id": "-B",
+			"type": "string"
+		},
+		"BOTTOM": {
+			"default": "",
+			"description": "ignore from b (mm) upwards in MNI152/Talairach space [default=false]",
+			"id": "-b",
+			"type": "string"
+		},
+		"DEBUG": {
+			"default": false,
+			"description": "debug (don't delete intermediate files) [default=false]",
+			"id": "-d",
+			"type": "boolean"
+		},
+		"REGIONAL": {
+			"default": false,
+			"description": "tell SIENAX to estimate \"regional\" volumes as well as global; this produces peripheral cortex GM volume (3-class segmentation only) and ventricular CSF volume [default=false]",
+			"id": "-r",
+			"type": "boolean"
+		},
+		"SEG": {
+			"default": false,
+			"description": "two-class segmentation (don't segment grey and white matter separately) - use this if there is poor grey/white contrast [default=false]",
+			"id": "-2",
+			"type": "boolean"
+		},
+		"SS_BET": {
+			"default": false,
+			"description": "use standard-space masking as well as BET [default=false]",
+			"id": "-m",
+			"type": "boolean"
+		},
+		"S_DIFF": {
+			"default": "",
+			"description": "siena_diff options",
+			"id": "-S",
+			"type": "string"
+		},
+		"S_FAST": {
+			"default": "",
+			"description": "if you want to change the segmentation defaults, put FAST options inside double-quotes after using the -S flag. For example, to increase the number of segmentation iterations use: -S \"-i 20\"",
+			"id": "-S",
+			"type": "string"
+		},
+		"T2": {
+			"default": false,
+			"description": "tell FAST that the input images are T2-weighted and not T1 [default=false]",
+			"id": "-t2",
+			"type": "boolean"
+		},
+		"TOP": {
+			"default": "",
+			"description": "ignore from t (mm) upwards in MNI152/Talairach space [default=false]",
+			"id": "-t",
+			"type": "string"
+		},
+		"VENT": {
+			"default": false,
+			"description": "run ventricle analysis VIENA [default=false]",
+			"id": "-V",
+			"type": "boolean"
+		},
+		"siena_single_input": {
+			"default": false,
+			"description": "Run Siena with a single input. Default behavior for single input is to run SienaX.",
+			"type": "boolean"
+		}
+	},
+	"environment": {
+		"FSLBROWSER": "/etc/alternatives/x-www-browser",
+    "FSLDIR": "/usr/share/fsl/5.0",
+    "FSLLOCKDIR": "",
+    "FSLMACHINELIST": "",
+    "FSLMULTIFILEQUIT": "TRUE",
+    "FSLOUTPUTTYPE": "NIFTI_GZ",
+    "FSLREMOTECALL": "",
+    "FSLTCLSH": "/usr/bin/tclsh",
+    "FSLWISH": "/usr/bin/wish",
+		"LD_LIBRARY_PATH": "/usr/lib/fsl/5.0",
+		"PATH": "/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+		"POSSUMDIR": "/usr/share/fsl/5.0"
+	},
+	"command": "python3 run.py",
+	"author": "Kaleb Fischer",
+	"maintainer": "Kaleb Fischer",
+	"license": "Apache-2.0",
+	"source": "https://github.com/flywheel-apps/fsl-siena-sienax/tree/master/fsl-siena",
+	"url": "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SIENA",
+	"custom": {
+		"gear-builder": {
+			"category": "analysis",
+			"image": "fsl-siena:1.1.0"
+		}
+	}
+}
