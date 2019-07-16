@@ -91,6 +91,21 @@
 			"type": "boolean"
 		}
 	},
+	"environment": {
+		"FSLBROWSER": "/etc/alternatives/x-www-browser",
+    "FSLDIR": "/usr/share/fsl/5.0",
+    "FSLLOCKDIR": "",
+    "FSLMACHINELIST": "",
+    "FSLMULTIFILEQUIT": "TRUE",
+    "FSLOUTPUTTYPE": "NIFTI_GZ",
+    "FSLREMOTECALL": "",
+    "FSLTCLSH": "/usr/bin/tclsh",
+    "FSLWISH": "/usr/bin/wish",
+		"LD_LIBRARY_PATH": "/usr/lib/fsl/5.0",
+		"PATH": "/usr/lib/fsl/5.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+		"POSSUMDIR": "/usr/share/fsl/5.0"
+	},
+	"command": "python3 run.py",
 	"author": "Analysis Group, FMRIB, Oxford, UK.",
 	"maintainer": "Kaleb Fischer \u003ckalebfischer@flywheel.io\u003e",
 	"license": "Apache-2.0",
