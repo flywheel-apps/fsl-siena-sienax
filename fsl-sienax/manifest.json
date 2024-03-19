@@ -78,7 +78,7 @@
   "author": "Analysis Group, FMRIB, Oxford, UK.",
   "maintainer": "Kaleb Fischer <kalebfischer@flywheel.io>",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SIENA",
   "custom": {
     "flywheel": {
       "suite": "Image Processing",
@@ -107,5 +107,5 @@
       "image": "fsl-siena:1.0.2"
     }
   },
-  "url": "https://github.com/flywheel-apps/fsl-siena-sienax"
+  "url": "https://github.com/flywheel-apps/fsl-siena-sienax/tree/master/fsl-sienax"
 }
